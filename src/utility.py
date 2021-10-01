@@ -121,6 +121,7 @@ def is_win(board: Board) -> Tuple[str, str]:
         for col in range(board.col):
             checked = check_streak(board, row, col)
             if checked:
+                print("checked",checked)
                 if checked[0] == GameConstant.WIN_PRIOR[0]:
                     return checked[1]
                 else:
