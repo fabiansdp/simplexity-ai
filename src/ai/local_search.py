@@ -1,12 +1,12 @@
 import random
+import math
 from time import time
 
 from src.constant import ShapeConstant
 from src.model import State
-from constant import GameConstant
+from src.constant import GameConstant
 from typing import Tuple, List
-import math
-from utility import is_full, is_out, check_streak, place
+from src.utility import is_full, is_out, check_streak, place
 '''
 Langkah menentukan value/nilai
 1. cari row dari column dengan fungsi place pada utility
