@@ -153,3 +153,29 @@ def place(state: State, n_player: int, shape: str, col: str) -> int:
             return row
 
     return -1
+
+def getRow(state: State, n_player: int, shape: str, col: str) -> int:
+    """
+    Modification of place function, just remove set board state.
+    [DESC]
+        Function to get location of piece in board
+    [PARAMS]
+        state = current state in the game
+        n_player = which player (player 1 or 2)
+        shape = shape
+        col = which col
+    [RETURN]
+        -1 if placement is invalid
+        int(row) if placement is valid 
+    """
+    if state.players[n_player].quota[shape] == 0:
+        return -1
+
+    for row in range(state.board.row - 1, -1, -1):
+        try:
+            if state.board[row, col].shape == ShapeConstant.BLANK:
+                return int(row)
+        except Exception as e:
+            pass
+
+    return -1

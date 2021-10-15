@@ -6,10 +6,10 @@ from src.constant import ShapeConstant
 from src.model import State
 from src.constant import GameConstant
 from typing import Tuple, List
-from src.utility import is_full, is_out, check_streak, place
+from src.utility import is_full, is_out, check_streak, place, getRow
 '''
 Langkah menentukan value/nilai
-1. cari row dari column dengan fungsi place pada utility
+1. cari row dari column dengan fungsi getRow pada utility
 2. win priority shape>color
 3. waktu berfikir diimplement disini, tapi caranya gimanaaaa
 4. local search pake simulated annealing, pake asumsi T=1000 mungkin
@@ -49,7 +49,7 @@ class LocalSearch:
         skor = -1
         if self.board == None or self.state == None : return -1
         curr_col = solusi[0]
-        curr_row = place(self.state, self.player, solusi[1], str(curr_col))
+        curr_row = getRow(self.state, self.player, solusi[1], curr_col)
 
         if is_out(self.board, curr_row, curr_col):
             return -1
