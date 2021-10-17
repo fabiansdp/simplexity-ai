@@ -232,3 +232,60 @@ def getRow(state: State, n_player: int, shape: str, col: str) -> int:
             pass
 
     return -1
+
+def count_streak(board: Board, row:int, col:int):
+    piece = board[row, col]
+    if piece.shape == ShapeConstant.BLANK:
+        return None
+
+    streak_way = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+    ret_count = 0
+    for prior in GameConstant.WIN_PRIOR:
+        mark = 0
+        for row_ax, col_ax in streak_way:
+            row_ = row + row_ax
+            col_ = col + col_ax
+            for _ in range(GameConstant.N_COMPONENT_STREAK - 1):
+                if is_out(board, row_, col_):
+                    mark = 0
+                    break
+
+                shape_condition = (
+                    prior == GameConstant.SHAPE
+                    and piece.shape != board[row_, col_].shape
+                )
+                color_condition = (
+                    prior == GameConstant.COLOR
+                    and piece.color != board[row_, col_].color
+                )
+                if shape_condition or color_condition:
+                    mark = 0
+                    break
+
+                row_ += row_ax
+                col_ += col_ax
+                mark += 1
+
+            if mark == GameConstant.N_COMPONENT_STREAK - 1:
+                return mark
+            elif mark > ret_count:
+                ret_count = mark
+    
+    return ret_count
+
+def scoreV2(state: State, n_player:int)->int:
+    board = state.board
+    temp_win = -1
+    for row in range(board.row):
+        for col in range(board.col):
+            if board[row,col].color == state.players[n_player].color: #mencocokan warna
+                tmp_score = count_streak(board, row, col)
+                if tmp_score>temp_win:
+                    temp_win = tmp_score
+                
+                if temp_win==GameConstant.N_COMPONENT_STREAK - 1:
+                    win = check_streak(board,row,col)
+                    if win and win[0] == GameConstant.WIN_PRIOR[0]: #prioritas berdasar shape win 
+                        return temp_win + 1
+                    
+    return temp_win

@@ -68,7 +68,7 @@ class Minimax:
             valid = place(newState, n_player, move[1], move[0])
             # If placement valid, count nodeScore
             if (valid != -1):
-                print(newState.board)
+                #print(newState.board)
                 nodeScore = min(nodeScore, self.maxABValue(newState, (n_player+1)%2, alpha, beta, depth+1))
                 # Prune
                 if (nodeScore <= alpha):
