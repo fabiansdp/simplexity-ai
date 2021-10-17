@@ -4,6 +4,59 @@ from typing import Tuple
 from src.model import Piece, Board, State
 from src.constant import ShapeConstant, GameConstant
 
+def score(solusi : Tuple[str, str], state: State, n_player: int) -> int:
+    """
+    [DESC]
+        Objective function to score board state
+    [PARAMS]
+        solusi: Tuple[str, str] -> Move that you want to make
+        state: State -> State of Game
+        n_player: int -> Player Number
+    [RETURN] 
+        -1 if is out
+        0 if no streak
+        1 if color streak
+        2 if shape streak
+    """
+    skor = -1
+    if state.board == None or state == None : return -1
+
+    curr_col = solusi[0]
+    curr_row = getRow(state, n_player, solusi[1], curr_col)
+
+    if is_out(state.board, curr_row, curr_col):
+        return -1
+    
+    cs = check_streak(state.board, curr_row, curr_col)
+    skor = 0 if cs == None else (2 if cs[0] == GameConstant.SHAPE else 1)
+    
+    return skor
+
+def getRow(state: State, n_player: int, shape: str, col: str) -> int:
+    """
+    Modification of place function, just remove set board state.
+    [DESC]
+        Function to get location of piece in board
+    [PARAMS]
+        state = current state in the game
+        n_player = which player (player 1 or 2)
+        shape = shape
+        col = which col
+    [RETURN]
+        -1 if placement is invalid
+        int(row) if placement is valid 
+    """
+    if state.players[n_player].quota[shape] == 0:
+        return -1
+
+    for row in range(state.board.row - 1, -1, -1):
+        try:
+            if state.board[row, col].shape == ShapeConstant.BLANK:
+                return int(row)
+        except Exception as e:
+            pass
+
+    return -1
 
 def dump(obj, path):
     """

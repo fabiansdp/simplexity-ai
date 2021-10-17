@@ -4,9 +4,8 @@ from time import time
 
 from src.constant import ShapeConstant
 from src.model import State
-from src.constant import GameConstant
-from typing import Tuple, List
-from src.utility import is_full, is_out, check_streak, place, getRow
+from typing import Tuple
+from src.utility import score
 '''
 Langkah menentukan value/nilai
 1. cari row dari column dengan fungsi getRow pada utility
@@ -40,25 +39,6 @@ class LocalSearch:
         self.state = None
         self.player = None
 
-    def _score(self, solusi : Tuple[str, str]) -> int:
-        #daftar skor
-        # -1 ketika is out
-        #  0 ketika check streak None
-        # 1 ketika check streak mendapat color
-        # 2 ketika check streak mendapat shape
-        skor = -1
-        if self.board == None or self.state == None : return -1
-        curr_col = solusi[0]
-        curr_row = getRow(self.state, self.player, solusi[1], curr_col)
-
-        if is_out(self.board, curr_row, curr_col):
-            return -1
-        
-        cs = check_streak(self.board, curr_row, curr_col)
-        skor = 0 if cs == None else (2 if cs[0] == GameConstant.SHAPE else 1)
-        
-        return skor
-
     def find(self, state: State, n_player: int, thinking_time: float) -> Tuple[str, str]:
         self.thinking_time = time() + thinking_time
         self.board = state.board
@@ -68,16 +48,16 @@ class LocalSearch:
         T = 1000
         a = 0.1
         
-        best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE])) #minimax algorithm
+        best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
 
         while(self.thinking_time >= time()):
             new_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
 
-            if(self._score(new_movement) > self._score(best_movement)):
+            if(score(new_movement, self.state, self.player) > score(best_movement, self.state, self.player)):
                 best_movement = new_movement
             else:
-                new_cost = self._score(new_movement)
-                old_cost = self._score(best_movement)
+                new_cost = score(new_movement, self.state, self.player)
+                old_cost = score(best_movement, self.state, self.player)
                 try:
                     e = math.exp(old_cost - new_cost / T)
                 except OverflowError:
@@ -85,7 +65,7 @@ class LocalSearch:
                 if(e > random.uniform(0,1)):
                     best_movement = new_movement
             
-            if(self._score(best_movement)==2):
+            if(score(best_movement, self.state, self.player)==2):
                 #auto break jika score sudah maksimal (skor maksimal yang dapat diperoleh adalah 2)
                 break
             else:
