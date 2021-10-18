@@ -1,4 +1,4 @@
-from src.ai import Minimax, LocalSearch
+from src.ai import *
 from src.constant import Path
 from src.utility import dump
 
