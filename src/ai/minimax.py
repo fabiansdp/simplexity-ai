@@ -60,6 +60,16 @@ def count_streak(board: Board, row: int, col: int) -> int:
     return ret_count
 
 def score(state: State, n_player: int) -> int:
+    """
+    [DESC]
+        Fungsi objective function
+    [PARAMS]
+        state: State -> State game saat ini
+        n_player: int -> Nomor giliran pemain
+    [RETURN]
+        Jumlah streak piece pada board terbanyak.
+        Range dari 0 sampai 4.
+    """
     board = state.board
     stateScore = 0
     # Penelusuran seluruh kolom dan baris
