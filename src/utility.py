@@ -4,34 +4,6 @@ from typing import Tuple
 from src.model import Piece, Board, State
 from src.constant import ShapeConstant, GameConstant
 
-def score(solusi : Tuple[str, str], state: State, n_player: int) -> int:
-    """
-    [DESC]
-        Objective function to score board state
-    [PARAMS]
-        solusi: Tuple[str, str] -> Move that you want to make
-        state: State -> State of Game
-        n_player: int -> Player Number
-    [RETURN] 
-        -1 if is out
-        0 if no streak
-        1 if color streak
-        2 if shape streak
-    """
-    skor = -1
-    if state.board == None or state == None : return -1
-
-    curr_col = solusi[0]
-    curr_row = getRow(state, n_player, solusi[1], curr_col)
-
-    if is_out(state.board, curr_row, curr_col):
-        return -1
-    
-    cs = check_streak(state.board, curr_row, curr_col)
-    skor = 0 if cs == None else (2 if cs[0] == GameConstant.SHAPE else 1)
-    
-    return skor
-
 def getRow(state: State, n_player: int, shape: str, col: str) -> int:
     """
     Modification of place function, just remove set board state.
@@ -233,7 +205,7 @@ def getRow(state: State, n_player: int, shape: str, col: str) -> int:
 
     return -1
 
-def count_streak(board: Board, row:int, col:int):
+def count_streak(board: Board, row: int, col: int) -> int:
     piece = board[row, col]
     if piece.shape == ShapeConstant.BLANK:
         return None
@@ -273,7 +245,7 @@ def count_streak(board: Board, row:int, col:int):
     
     return ret_count
 
-def scoreV2(state: State, n_player:int)->int:
+def score(state: State, n_player: int) -> int:
     board = state.board
     temp_win = -1
     for row in range(board.row):

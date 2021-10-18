@@ -4,8 +4,8 @@ from typing import Tuple, List
 from copy import deepcopy
 
 from src.constant import ShapeConstant
-from src.model import Board, State, Piece
-from src.utility import getRow, score, place
+from src.model import State
+from src.utility import place, score
 
 '''
 Minimax Alpha Beta Pruning
@@ -80,11 +80,12 @@ class Minimax:
 
     def maxABValue(self, state: State, n_player: int, alpha: int, beta: int, depth: int) -> int:
         """
-        Cari skor maksimum.
+        Cari skor maksimum. Mengembalikan score
         """
         # Apabila node daun, kembalikan score node berdasarkan objective function
-        if depth == 2:
-            return random.choice([-1, 0, 1, 2])
+        if depth == 4:
+            terminalScore = score(state, n_player)
+            return terminalScore
 
         nodeScore = -1000
         moveList = self.getMoves(n_player, state)
@@ -95,7 +96,7 @@ class Minimax:
             valid = place(newState, n_player, move[1], move[0])
 
             if (valid != -1):
-                nodeScore = max(nodeScore, self.minABValue(newState, (n_player+1)%2), alpha, beta, depth+1)
+                nodeScore = max(nodeScore, self.minABValue(newState, (n_player+1)%2, alpha, beta, depth+1))
                 #if beta < nodeScore, prune
                 if (nodeScore >= beta):
                     return nodeScore
@@ -109,6 +110,6 @@ class Minimax:
 
         while (time() < self.thinking_time):
             self.minimax(n_player, state, 0)
-            break
+            break #Break if finished exploring successor tree
             
         return self.best_movement

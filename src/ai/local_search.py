@@ -5,7 +5,7 @@ from time import time
 from src.constant import ShapeConstant
 from src.model import State
 from typing import Tuple
-from src.utility import score, place, scoreV2,is_out,getRow
+from src.utility import place, score, is_out, getRow
 from copy import deepcopy
 '''
 Langkah menentukan value/nilai
@@ -61,11 +61,11 @@ class LocalSearch:
                 place(self.state, self.player, best_movement[1], int(best_movement[0]))
 
 
-                if(scoreV2(tempState, self.player) > scoreV2(self.state, self.player)):
+                if(score(tempState, self.player) > score(self.state, self.player)):
                     best_movement = new_movement
                 else:
-                    new_cost = scoreV2(tempState, self.player)
-                    old_cost = scoreV2(self.state, self.player)
+                    new_cost = score(tempState, self.player)
+                    old_cost = score(self.state, self.player)
                     try:
                         e = math.exp(old_cost - new_cost / T)
                     except OverflowError:
@@ -73,7 +73,7 @@ class LocalSearch:
                     if(e > random.uniform(0,1)):
                         best_movement = new_movement
                 
-                if(scoreV2(tempState, self.player)==4):
+                if(score(tempState, self.player)==4):
                     #auto break jika score sudah maksimal (skor maksimal yang dapat diperoleh adalah 2)
                     break
                 else:
