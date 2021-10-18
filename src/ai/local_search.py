@@ -1,12 +1,12 @@
 import random
 import math
 from time import time
-
-from src.constant import ShapeConstant
-from src.model import State
 from typing import Tuple
-from src.utility import place, score, is_out, getRow
 from copy import deepcopy
+
+from src.constant import ShapeConstant, GameConstant
+from src.model import State, Board
+from src.utility import place, is_out, check_streak
 '''
 Langkah menentukan value/nilai
 1. cari row dari column dengan fungsi getRow pada utility
@@ -33,6 +33,88 @@ while(self.thinking_time >= time()):
 
 ret best;
 '''
+def getRow(state: State, n_player: int, shape: str, col: str) -> int:
+    """
+    Modification of place function, just remove set board state.
+    [DESC]
+        Function to get location of piece in board
+    [PARAMS]
+        state = current state in the game
+        n_player = which player (player 1 or 2)
+        shape = shape
+        col = which col
+    [RETURN]
+        -1 if placement is invalid
+        int(row) if placement is valid 
+    """
+    if state.players[n_player].quota[shape] == 0:
+        return -1
+
+    for row in range(state.board.row - 1, -1, -1):
+        try:
+            if state.board[row, col].shape == ShapeConstant.BLANK:
+                return int(row)
+        except Exception as e:
+            pass
+
+    return -1
+
+def count_streak(board: Board, row: int, col: int) -> int:
+    piece = board[row, col]
+    if piece.shape == ShapeConstant.BLANK:
+        return None
+
+    streak_way = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+    ret_count = 0
+    for prior in GameConstant.WIN_PRIOR:
+        mark = 0
+        for row_ax, col_ax in streak_way:
+            row_ = row + row_ax
+            col_ = col + col_ax
+            for _ in range(GameConstant.N_COMPONENT_STREAK - 1):
+                if is_out(board, row_, col_):
+                    mark = 0
+                    break
+
+                shape_condition = (
+                    prior == GameConstant.SHAPE
+                    and piece.shape != board[row_, col_].shape
+                )
+                color_condition = (
+                    prior == GameConstant.COLOR
+                    and piece.color != board[row_, col_].color
+                )
+                if shape_condition or color_condition:
+                    mark = 0
+                    break
+
+                row_ += row_ax
+                col_ += col_ax
+                mark += 1
+
+            if mark == GameConstant.N_COMPONENT_STREAK - 1:
+                return mark
+            elif mark > ret_count:
+                ret_count = mark
+    
+    return ret_count
+
+def score(state: State, n_player: int) -> int:
+    board = state.board
+    temp_win = -1
+    for row in range(board.row):
+        for col in range(board.col):
+            if board[row,col].color == state.players[n_player].color: #mencocokan warna
+                tmp_score = count_streak(board, row, col)
+                if tmp_score>temp_win:
+                    temp_win = tmp_score
+                
+                if temp_win==GameConstant.N_COMPONENT_STREAK - 1:
+                    win = check_streak(board,row,col)
+                    if win and win[0] == GameConstant.WIN_PRIOR[0]: #prioritas berdasar shape win 
+                        return temp_win + 1
+                    
+    return temp_win
 
 class LocalSearch:
     def __init__(self):
