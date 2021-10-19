@@ -146,7 +146,8 @@ class LocalSearch:
         
         #variable untuk menyimpan best movement, untuk inisialisasi maka (0, Circle)
         best_movement = (0, ShapeConstant.CIRCLE)
-        flag = False
+        flag = False #jika False maka program baru saja melakukan inisialisasi / iterasi pertama 
+
         while(self.thinking_time > time()):
             #melakukan random solusi baru
             new_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
