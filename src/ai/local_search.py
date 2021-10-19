@@ -146,7 +146,7 @@ class LocalSearch:
         
         best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
         
-        while(self.thinking_time >= time()):
+        while(self.thinking_time > time()):
             new_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
             tempState = deepcopy(self.state)
 
