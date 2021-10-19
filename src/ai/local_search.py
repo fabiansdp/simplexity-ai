@@ -144,9 +144,9 @@ class LocalSearch:
         T = 1000
         a = 0.1
         
-        #melakukan random solusi awal
-        best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
-        
+        #variable untuk menyimpan best movement, untuk inisialisasi maka (0, Circle)
+        best_movement = (0, ShapeConstant.CIRCLE)
+        flag = False
         while(self.thinking_time > time()):
             #melakukan random solusi baru
             new_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
@@ -156,6 +156,7 @@ class LocalSearch:
             if(
                 not is_out(self.state.board,getRow(self.state, self.player, new_movement[1], int(new_movement[0])),new_movement[0]) 
                 and not is_out(self.state.board,getRow(self.state, self.player, best_movement[1], int(best_movement[0])),best_movement[0])
+                and flag
             ):
                 place(tempState, self.player, new_movement[1], int(new_movement[0]))
                 place(self.state, self.player, best_movement[1], int(best_movement[0]))
@@ -183,10 +184,12 @@ class LocalSearch:
                 
                 self.state = deepcopy(state)
             elif(
-                not is_out(self.state.board,getRow(self.state, self.player, new_movement[1], int(new_movement[0])),new_movement[0]) 
-                and is_out(self.state.board,getRow(self.state, self.player, best_movement[1], int(best_movement[0])),best_movement[0])
+                (not is_out(self.state.board,getRow(self.state, self.player, new_movement[1], int(new_movement[0])),new_movement[0]) 
+                and is_out(self.state.board,getRow(self.state, self.player, best_movement[1], int(best_movement[0])),best_movement[0]))
+                or (not flag)
                 ):
                 best_movement = new_movement
+                flag = True
 
 
         return best_movement
