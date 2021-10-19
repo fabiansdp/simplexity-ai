@@ -144,12 +144,15 @@ class LocalSearch:
         T = 1000
         a = 0.1
         
+        #melakukan random solusi awal
         best_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
         
         while(self.thinking_time > time()):
+            #melakukan random solusi baru
             new_movement = (random.randint(0, state.board.col), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
             tempState = deepcopy(self.state)
 
+            #cek apakah solusi yang dihasilkan out of board tidak
             if(
                 not is_out(self.state.board,getRow(self.state, self.player, new_movement[1], int(new_movement[0])),new_movement[0]) 
                 and not is_out(self.state.board,getRow(self.state, self.player, best_movement[1], int(best_movement[0])),best_movement[0])
@@ -157,12 +160,13 @@ class LocalSearch:
                 place(tempState, self.player, new_movement[1], int(new_movement[0]))
                 place(self.state, self.player, best_movement[1], int(best_movement[0]))
 
-
+                #cek apakah solusi baru punya obj score lebih baik
                 if(score(tempState, self.player) > score(self.state, self.player)):
                     best_movement = new_movement
                 else:
                     new_cost = score(tempState, self.player)
                     old_cost = score(self.state, self.player)
+                    #mencoba untuk  melakukan penerimaan solusi lebih buruk jika random(0,1) < e^(ΔE/T)
                     try:
                         e = math.exp(old_cost - new_cost / T)
                     except OverflowError:
@@ -170,7 +174,8 @@ class LocalSearch:
                     if(e > random.uniform(0,1)):
                         best_movement = new_movement
                 
-                if(score(tempState, self.player)==4):
+                #karena skor maks adalah 4, jika sudah mencapai 4 maka terminate saja dan bakal return solusi
+                if(score(self.state, self.player)==4):
                     #auto break jika score sudah maksimal (skor maksimal yang dapat diperoleh adalah 2)
                     break
                 else:
