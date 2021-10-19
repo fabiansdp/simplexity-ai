@@ -137,7 +137,7 @@ class LocalSearch:
         self.player = None
 
     def find(self, state: State, n_player: int, thinking_time: float) -> Tuple[str, str]:
-        self.thinking_time = time() + thinking_time
+        self.thinking_time = time() + (thinking_time * 0.999)
         self.state = deepcopy(state)
         self.player = n_player
         #Set Suhu dan pengurangan suhu
