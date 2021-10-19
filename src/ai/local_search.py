@@ -175,6 +175,7 @@ class LocalSearch:
                         best_movement = new_movement
                 
                 #karena skor maks adalah 4, jika sudah mencapai 4 maka terminate saja dan bakal return solusi
+                place(self.state, self.player, best_movement[1], int(best_movement[0]))
                 if(score(self.state, self.player)==4):
                     #auto break jika score sudah maksimal (skor maksimal yang dapat diperoleh adalah 2)
                     break
