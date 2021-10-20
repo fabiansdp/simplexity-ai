@@ -59,55 +59,72 @@ def getRow(state: State, n_player: int, shape: str, col: str) -> int:
 
     return -1
 
-def count_streak(board: Board, row: int, col: int) -> int:
+def scoreGreater(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> bool:
+    if tuple1[1] > tuple2[1]:
+        return True
+    
+    if tuple1[1] == tuple2[1] and tuple1[0] == GameConstant.WIN_PRIOR[0]:
+        return True
+
+    return False
+
+def scoreSmaller(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> bool:
+    if tuple1[1] < tuple2[1]:
+        return True
+    
+    if tuple1[1] == tuple2[1] and tuple1[0] == GameConstant.WIN_PRIOR[1]:
+        return True
+
+    return False
+
+def count_streak(board: Board, row: int, col: int, prior: str) -> Tuple[str, int]:
     piece = board[row, col]
     if piece.shape == ShapeConstant.BLANK:
         return None
 
     # Arah mata angin
     streak_way = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
-    ret_count = 1
-    # Loop prioritas kemenangan yaitu shape dulu baru color
-    for prior in GameConstant.WIN_PRIOR:
+    ret_count = (prior, 1)
+
+    # Pergerakan arah mata angin
+    for row_ax, col_ax in streak_way:
         mark = 1
-        # Pergerakan arah mata angin
-        for row_ax, col_ax in streak_way:
-            row_ = row + row_ax
-            col_ = col + col_ax
-            # Gerakan sebanyak 4 kali
-            for _ in range(GameConstant.N_COMPONENT_STREAK - 1):
-                # Apabila posisi di luar board, break
-                if is_out(board, row_, col_):
-                    break
+        row_ = row + row_ax
+        col_ = col + col_ax
+        # Gerakan sebanyak 4 kali
+        for _ in range(GameConstant.N_COMPONENT_STREAK - 1):
+            # Apabila posisi di luar board, break
+            if is_out(board, row_, col_):
+                break
 
-                # Apabila saat pengecekan streak shape dan piece bukan shape yang sama
-                shape_condition = (
-                    prior == GameConstant.SHAPE
-                    and piece.shape != board[row_, col_].shape
-                )
-                # Apabila saat pengecekan streak color dan piece pada board bukan color yang sama
-                color_condition = (
-                    prior == GameConstant.COLOR
-                    and piece.color != board[row_, col_].color
-                )
-                # Apabila terjadi salah satu dari kedua kondisi di atas, break
-                if shape_condition or color_condition:
-                    break
+            # Apabila saat pengecekan streak shape dan piece bukan shape yang sama
+            shape_condition = (
+                prior == GameConstant.SHAPE
+                and piece.shape != board[row_, col_].shape
+            )
+            # Apabila saat pengecekan streak color dan piece pada board bukan color yang sama
+            color_condition = (
+                prior == GameConstant.COLOR
+                and piece.color != board[row_, col_].color
+            )
+            # Apabila terjadi salah satu dari kedua kondisi di atas, break
+            if shape_condition or color_condition:
+                break
 
-                row_ += row_ax
-                col_ += col_ax
-                mark += 1
+            row_ += row_ax
+            col_ += col_ax
+            mark += 1
 
-            if mark > ret_count:
-                ret_count = mark
+        if mark > ret_count[1]:
+            ret_count = (prior, mark)
 
-            # Apabila ada streak berjumlah 4, langsung return
-            if mark == GameConstant.N_COMPONENT_STREAK:
-                return mark
+        # Apabila ada streak berjumlah 4, langsung return
+        if mark == GameConstant.N_COMPONENT_STREAK:
+            return (prior, mark)
     
     return ret_count
 
-def score(state: State, n_player: int) -> int:
+def score(state: State, n_player: int) -> Tuple[str, int]:
     """
     [DESC]
         Fungsi objective function
@@ -119,17 +136,24 @@ def score(state: State, n_player: int) -> int:
         Range dari 0 sampai 4.
     """
     board = state.board
-    stateScore = 0
+    stateScore = ("NONE", 0)
     # Penelusuran seluruh kolom dan baris
     for row in range(board.row):
         for col in range(board.col):
+            # Apabila bentuk bidak sama dengan bentuk pemain, mulai penghitungan streak
+            if board[row,col].shape == state.players[n_player].shape:
+                tempScore = count_streak(board, row, col, GameConstant.WIN_PRIOR[0])
+                if scoreGreater(tempScore, stateScore):
+                    stateScore = tempScore
+
             # Apabila warna bidak sama dengan warna pemain, mulai penghitungan streak
             if board[row,col].color == state.players[n_player].color:
-                tempScore = count_streak(board, row, col)
-                if tempScore > stateScore:
+                tempScore = count_streak(board, row, col, GameConstant.WIN_PRIOR[1])
+                if scoreGreater(tempScore, stateScore):
                     stateScore = tempScore
                 
     return stateScore
+
 
 class LocalSearch:
     def __init__(self):
@@ -162,22 +186,25 @@ class LocalSearch:
                 place(tempState, self.player, new_movement[1], int(new_movement[0]))
                 place(self.state, self.player, best_movement[1], int(best_movement[0]))
 
-                #cek apakah solusi baru punya obj score lebih baik
-                if(score(tempState, self.player) > score(self.state, self.player)):
+                #cek apakah solusi baru punya obj score lebih baik, untuk obj score ==4 akan ada penilian tambahan dengan memperhatikan bentuk shape
+                if( score(tempState, self.player) > score(self.state, self.player) or 
+                    (score(tempState, self.player) and new_movement[1] == GameConstant.WIN_PRIOR[1])
+                ):
                     best_movement = new_movement
                 else:
                     new_cost = score(tempState, self.player)
                     old_cost = score(self.state, self.player)
                     #mencoba untuk  melakukan penerimaan solusi lebih buruk jika random(0,1) < e^(ΔE/T)
                     try:
-                        e = math.exp(old_cost - new_cost / T)
+                        e = math.exp(old_cost[1] - new_cost[1] / T)
                     except OverflowError:
                         e = 1
                     if(e > random.uniform(0,1)):
                         best_movement = new_movement
                 
                 #karena skor maks adalah 4, jika sudah mencapai 4 maka terminate saja dan bakal return solusi
-                if(score(tempState, self.player)==4):
+                sc = score(tempState, self.player)
+                if(sc[1]==4 and sc[0] == GameConstant.WIN_PRIOR[0]):
                     #auto break jika score sudah maksimal (skor maksimal yang dapat diperoleh adalah 2)
                     break
                 else:
