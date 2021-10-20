@@ -93,6 +93,74 @@ def count_streak(board: Board, row: int, col: int, prior: str) -> Tuple[str, int
     
     return ret_count
 
+def countAlmostWin(board: Board, row: int, col: int) -> Tuple[str, int]:
+    """
+    [DESC]
+        Menghitung streak yang akan hampir menang
+    [PARAMS]
+        state: State -> State game saat ini
+        n_player: int -> Nomor giliran pemain
+    [RETURN]
+        None kalau tidak ada streak yang hampir menang
+        Int apabila ada streak yang hampir menang
+    """
+    piece = board[row, col]
+
+    # Arah mata angin
+    streak_way = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)]
+    for prior in GameConstant.WIN_PRIOR:
+        mark = 0
+        for row_ax, col_ax in streak_way:
+            row_ = row + row_ax
+            col_ = col + col_ax
+            for _ in range(GameConstant.N_COMPONENT_STREAK - 2):
+                if is_out(board, row_, col_):
+                    mark = 0
+                    break
+
+                shape_condition = (
+                    prior == GameConstant.SHAPE
+                    and piece.shape != board[row_, col_].shape
+                )
+                color_condition = (
+                    prior == GameConstant.COLOR
+                    and piece.color != board[row_, col_].color
+                )
+                if shape_condition or color_condition:
+                    mark = 0
+                    break
+
+                row_ += row_ax
+                col_ += col_ax
+                mark += 1
+
+            if mark == GameConstant.N_COMPONENT_STREAK - 2 and (not is_out(board, row_, col_)) and board[row_, col_].shape == ShapeConstant.BLANK:
+                return (prior, col_)
+    
+    return None
+
+def almostWin(state: State, n_player: int) -> int:
+    """
+    [DESC]
+        Mengembalikan kolom yang akan hampir menang
+    [PARAMS]
+        state: State -> State game saat ini
+        n_player: int -> Nomor giliran pemain
+    [RETURN]
+        Jumlah streak piece pada board terbanyak.
+        Range dari 0 sampai 4.
+    """
+    board = state.board
+    opponent = state.players[(n_player+1)%2]
+    winRow = None
+    for row in range(board.row):
+        for col in range(board.col):
+            # Apabila bentuk bidak sama dengan bentuk pemain, mulai penghitungan streak
+            if board[row,col].shape == opponent.shape or board[row,col].color == opponent.color:
+                winRow = countAlmostWin(board, row, col)
+    
+    return winRow
+
 def score(state: State, n_player: int) -> Tuple[str, int]:
     """
     [DESC]
@@ -115,7 +183,7 @@ def score(state: State, n_player: int) -> Tuple[str, int]:
                 if scoreGreater(tempScore, stateScore):
                     stateScore = tempScore
 
-            # Apabila warna bidak sama dengan warna pemain, mulai penghitungan streak
+            # # Apabila warna bidak sama dengan warna pemain, mulai penghitungan streak
             if board[row,col].color == state.players[n_player].color:
                 tempScore = count_streak(board, row, col, GameConstant.WIN_PRIOR[1])
                 if scoreGreater(tempScore, stateScore):
@@ -126,7 +194,7 @@ def score(state: State, n_player: int) -> Tuple[str, int]:
 class Minimax:
     def __init__(self):
         self.thinking_time = 0
-        self.best_movement = (random.randint(0, 6), random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
+        self.best_movement = None
     
     def getMoves(self, n_player, state: State) -> List[Tuple[str, str]]:
         """
@@ -134,13 +202,15 @@ class Minimax:
         """
         moveList = []
         player = state.players[n_player]
+        opponent = state.players[(n_player+1)%2]
 
         for i in range(7):
-            if player.quota[ShapeConstant.CROSS] != 0:
-                moveList.append((i, ShapeConstant.CROSS))
+            if player.quota[player.shape] != 0:
+                moveList.append((i, player.shape))
 
-            if player.quota[ShapeConstant.CIRCLE] != 0:
-                moveList.append((i, ShapeConstant.CIRCLE))
+        for i in range(7):
+            if player.quota[opponent.shape] != 0:
+                moveList.append((i, opponent.shape))
 
         return moveList
 
@@ -151,7 +221,7 @@ class Minimax:
         beta = (GameConstant.WIN_PRIOR[0], 1000)
         # Get move list
         moveList = self.getMoves(n_player, state)
-        
+
         for move in moveList:
             # Deep copy state and do move
             newState = deepcopy(state)
@@ -183,6 +253,7 @@ class Minimax:
             # If placement valid, count nodeScore
             if (valid != -1):
                 nodeScore = minScore(nodeScore, self.maxABValue(newState, (n_player+1)%2, alpha, beta, depth+1))
+                
                 # Prune
                 if scoreGreater(alpha, nodeScore):
                     return nodeScore
@@ -221,9 +292,18 @@ class Minimax:
     def find(self, state: State, n_player: int, thinking_time: float) -> Tuple[str, str]:
         self.thinking_time = time() + thinking_time
 
+        if state.round == 1 or state.round == 2:
+            return (random.randint(0, 6), state.players[n_player].shape)
+
+        almostWinRow = almostWin(state, n_player)
+        if almostWinRow:
+            if almostWinRow[0] == GameConstant.SHAPE:
+                return (almostWinRow[1], state.players[n_player].shape)
+            else:
+                return (almostWinRow[1], random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
+
         while (time() < self.thinking_time):
             self.minimax(n_player, state, 0)
             break #Break if finished exploring successor tree
-        # print(score(state, n_player))
-            
+        
         return self.best_movement
