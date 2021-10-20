@@ -134,7 +134,8 @@ def countAlmostWin(board: Board, row: int, col: int) -> Tuple[str, int]:
                 col_ += col_ax
                 mark += 1
 
-            if mark == GameConstant.N_COMPONENT_STREAK - 2 and (not is_out(board, row_, col_)) and board[row_, col_].shape == ShapeConstant.BLANK:
+            # Apabila sudah ada streak 3 bidak, kembalikan kolom yang akan menyebabkan kemenangan musuh
+            if mark == GameConstant.N_COMPONENT_STREAK - 2 and (not is_out(board, row_, col_)) and (board[row_, col_].shape == ShapeConstant.BLANK and (is_out(board, row_ + 1, col_) or board[row_ + 1, col_].shape != ShapeConstant.BLANK)):
                 return (prior, col_)
     
     return None
@@ -295,11 +296,13 @@ class Minimax:
         if state.round == 1 or state.round == 2:
             return (random.randint(0, 6), state.players[n_player].shape)
 
+        # Cek apakah musuh akan menang
         almostWinRow = almostWin(state, n_player)
         if almostWinRow:
-            if almostWinRow[0] == GameConstant.SHAPE:
+            if almostWinRow[0] == GameConstant.SHAPE and state.players[n_player].quota[state.players[n_player].shape] != 0:
                 return (almostWinRow[1], state.players[n_player].shape)
-            else:
+            
+            if almostWinRow[0] == GameConstant.COLOR:
                 return (almostWinRow[1], random.choice([ShapeConstant.CROSS, ShapeConstant.CIRCLE]))
 
         while (time() < self.thinking_time):
