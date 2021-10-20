@@ -245,7 +245,7 @@ def score(state: State, n_player: int) -> Tuple[str, int]:
                 
     return stateScore
 
-class Minimax:
+class MinimaxGroup49:
     def __init__(self):
         self.thinking_time = 0
         self.best_movement = None

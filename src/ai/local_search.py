@@ -182,7 +182,7 @@ def score(state: State, n_player: int) -> Tuple[str, int]:
                 
     return stateScore
 
-class LocalSearch:
+class LocalSearchGroup49:
     def __init__(self):
         self.state = None
         self.player = None
