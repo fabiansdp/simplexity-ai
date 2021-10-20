@@ -182,7 +182,7 @@ def countAlmostWin(board: Board, row: int, col: int) -> Tuple[str, int]:
                 mark += 1
 
             # Apabila sudah ada streak 3 bidak, kembalikan kolom yang akan menyebabkan kemenangan musuh
-            if mark == GameConstant.N_COMPONENT_STREAK - 2 and (not is_out(board, row_, col_)) and (board[row_, col_].shape == ShapeConstant.BLANK and (is_out(board, row_ + 1, col_) or board[row_ + 1, col_].shape != ShapeConstant.BLANK)):
+            if mark == GameConstant.N_COMPONENT_STREAK - 2 and (not is_out(board, row_, col_)) and (board[row_, col_].shape == ShapeConstant.BLANK):
                 return (prior, col_)
     
     return None
@@ -203,9 +203,15 @@ def almostWin(state: State, n_player: int) -> int:
     winRow = None
     for row in range(board.row):
         for col in range(board.col):
-            # Apabila bentuk bidak sama dengan bentuk pemain, mulai penghitungan streak
+            # Apabila bentuk bidak sama dengan bentuk pemain atau warna sama, mulai penghitungan streak
             if board[row,col].shape == opponent.shape or board[row,col].color == opponent.color:
-                winRow = countAlmostWin(board, row, col)
+                tempRow = countAlmostWin(board, row, col)
+                
+                if winRow == None:
+                    winRow = tempRow
+                else:
+                    if tempRow and tempRow[0] == GameConstant.WIN_PRIOR[0]:
+                        winRow = tempRow
     
     return winRow
 
