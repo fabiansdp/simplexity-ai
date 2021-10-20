@@ -60,6 +60,15 @@ def getRow(state: State, n_player: int, shape: str, col: str) -> int:
     return -1
 
 def scoreGreater(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> bool:
+    """
+    [DESC]
+        Comparisan function for tuple 1 > tuple 2
+    [PARAMS]
+        tuple1: Tuple[str, int]
+        tuple2: Tuple[str, int]
+    [RETURN]
+        Boolean
+    """
     if tuple1[1] > tuple2[1]:
         return True
     
@@ -69,6 +78,15 @@ def scoreGreater(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> bool:
     return False
 
 def scoreSmaller(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> bool:
+    """
+    [DESC]
+        Comparisan function for tuple 1 < tuple 2
+    [PARAMS]
+        tuple1: Tuple[str, int]
+        tuple2: Tuple[str, int]
+    [RETURN]
+        Boolean
+    """
     if tuple1[1] < tuple2[1]:
         return True
     
@@ -78,6 +96,16 @@ def scoreSmaller(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> bool:
     return False
 
 def count_streak(board: Board, row: int, col: int, prior: str) -> Tuple[str, int]:
+    """
+    [DESC]
+        Menghitung streak yang akan hampir menang
+    [PARAMS]
+        board: Board
+        row: int
+        col: int
+    [RETURN]
+        Tuple[str, int] berisi jenis streak dan jumlahnya
+    """
     piece = board[row, col]
     if piece.shape == ShapeConstant.BLANK:
         return None
@@ -153,7 +181,6 @@ def score(state: State, n_player: int) -> Tuple[str, int]:
                     stateScore = tempScore
                 
     return stateScore
-
 
 class LocalSearch:
     def __init__(self):

@@ -11,6 +11,15 @@ from src.utility import place, is_out
 Minimax Alpha Beta Pruning
 '''
 def maxScore(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> Tuple[str, int]:
+    """
+    [DESC]
+        Max function for tuple 1 and tuple 2
+    [PARAMS]
+        tuple1: Tuple[str, int]
+        tuple2: Tuple[str, int]
+    [RETURN]
+        Tuple[str, int]
+    """
     if scoreGreater(tuple1, tuple2):
         return tuple1
     
@@ -20,6 +29,15 @@ def maxScore(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> Tuple[str, int
     return tuple1
 
 def minScore(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> Tuple[str, int]:
+    """
+    [DESC]
+        Min function for tuple 1 and tuple 2
+    [PARAMS]
+        tuple1: Tuple[str, int]
+        tuple2: Tuple[str, int]
+    [RETURN]
+        Tuple[str, int]
+    """
     if scoreSmaller(tuple1, tuple2):
         return tuple1
     
@@ -29,6 +47,15 @@ def minScore(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> Tuple[str, int
     return tuple1
 
 def scoreGreater(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> bool:
+    """
+    [DESC]
+        Comparisan function for tuple 1 > tuple 2
+    [PARAMS]
+        tuple1: Tuple[str, int]
+        tuple2: Tuple[str, int]
+    [RETURN]
+        Boolean
+    """
     if tuple1[1] > tuple2[1]:
         return True
     
@@ -38,6 +65,15 @@ def scoreGreater(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> bool:
     return False
 
 def scoreSmaller(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> bool:
+    """
+    [DESC]
+        Comparisan function for tuple 1 < tuple 2
+    [PARAMS]
+        tuple1: Tuple[str, int]
+        tuple2: Tuple[str, int]
+    [RETURN]
+        Boolean
+    """
     if tuple1[1] < tuple2[1]:
         return True
     
@@ -47,6 +83,16 @@ def scoreSmaller(tuple1: Tuple[str, int], tuple2: Tuple[str, int]) -> bool:
     return False
 
 def count_streak(board: Board, row: int, col: int, prior: str) -> Tuple[str, int]:
+    """
+    [DESC]
+        Menghitung streak yang akan hampir menang
+    [PARAMS]
+        board: Board
+        row: int
+        col: int
+    [RETURN]
+        Tuple[str, int] berisi jenis streak dan jumlahnya
+    """
     piece = board[row, col]
     if piece.shape == ShapeConstant.BLANK:
         return None
@@ -98,8 +144,9 @@ def countAlmostWin(board: Board, row: int, col: int) -> Tuple[str, int]:
     [DESC]
         Menghitung streak yang akan hampir menang
     [PARAMS]
-        state: State -> State game saat ini
-        n_player: int -> Nomor giliran pemain
+        board: Board
+        row: int
+        col: int
     [RETURN]
         None kalau tidak ada streak yang hampir menang
         Int apabila ada streak yang hampir menang
